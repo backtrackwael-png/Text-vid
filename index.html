@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan d’actions</title>
+<style>
+:root{--bg:#e9edf1;--card:#fff;--ink:#14202b;--mute:#5b6975;--line:#d6dde4;--acc:#12303f;
+--en:#c27d0e;--pl:#3a60b5;--cl:#2c7a5a;--ar:#8a949e;--red:#b3392f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+header{background:var(--acc);color:#fff;padding:22px 24px}
+.wrap{max-width:1120px;margin:0 auto}
+header .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:24px;font-weight:650;letter-spacing:-.01em}
+header p{margin:2px 0 0;color:#a9c0cc;font-size:14px}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #7fb2c9;outline-offset:1px}
+.btn-main{background:#fff;color:var(--acc);border-color:#fff;font-weight:600}
+.btn-ghost{background:transparent;color:#fff;border-color:#4b6b7b}
+.btn-ghost:hover{border-color:#fff}
+main{padding:22px 24px 40px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--k,var(--acc));border-radius:8px;padding:12px 16px}
+.kpi b{display:block;font-size:30px;line-height:1.1;font-weight:650}
+.kpi span{color:var(--mute);font-size:13px}
+.charts{display:grid;grid-template-columns:320px 1fr;gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.card h2{margin:0 0 12px;font-size:15px;font-weight:650}
+.donut{display:flex;align-items:center;gap:16px}
+.legend{list-style:none;margin:0;padding:0;font-size:13px}
+.legend li{display:flex;align-items:center;gap:8px;margin:4px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--k);display:inline-block}
+.brow{display:grid;grid-template-columns:130px 1fr 28px;gap:10px;align-items:center;margin:8px 0;font-size:13px}
+.bar{display:flex;height:14px;background:#eef1f4;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%}
+.tools{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;margin-bottom:10px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+input,select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+.tablebox{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:780px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:13px;color:var(--mute);font-weight:600;background:#f6f8fa}
+tr:last-child td{border-bottom:0}
+td.t{font-weight:600}
+td.t small{display:block;font-weight:400;color:var(--mute)}
+.late{color:var(--red);font-weight:600}
+.pri{display:inline-flex;align-items:center;gap:6px}
+.st{padding:5px 8px;border-left:4px solid var(--k);background:#f6f8fa}
+.row-actions{display:flex;gap:6px}
+.row-actions button{padding:5px 10px;font-size:13px}
+.del{color:var(--red)}
+.empty{padding:34px;text-align:center;color:var(--mute)}
+dialog{border:0;border-radius:10px;padding:22px;width:min(440px,92vw);box-shadow:0 20px 60px rgba(10,25,35,.35)}
+dialog::backdrop{background:rgba(10,25,35,.55)}
+dialog h3{margin:0 0 14px;font-size:18px}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+dialog input,dialog select{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--red);font-size:13px;min-height:18px;margin-top:8px}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.foot .ok{background:var(--acc);color:#fff;border-color:var(--acc)}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div><h1>Plan d’actions</h1><p id="today"></p></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn-ghost" id="bPw">Changer le mot de passe</button>
+<button class="btn-main" id="bAdd">Ajouter une action</button>
+</div></div></header>
+
+<main><div class="wrap">
+<section class="kpis" id="kpis"></section>
+<section class="charts">
+<div class="card"><h2>Répartition par statut</h2><div class="donut" id="donut"></div></div>
+<div class="card"><h2>Actions par responsable</h2><div id="bars"></div></div>
+</section>
+<div class="tools">
+<div class="tabs" id="tabs"></div>
+<input type="search" id="q" placeholder="Rechercher une action ou un responsable" aria-label="Rechercher" style="min-width:260px">
+</div>
+<div class="tablebox"><table>
+<thead><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Priorité</th><th>Statut</th><th>Opérations</th></tr></thead>
+<tbody id="rows"></tbody></table><div class="empty" id="empty" hidden>Aucune action dans cette vue. Utilisez « Ajouter une action » pour en créer une.</div></div>
+</div></main>
+
+<dialog id="dAdd"><h3>Ajouter une action</h3>
+<label for="fT">Intitulé</label><input id="fT">
+<label for="fD">Détail (facultatif)</label><input id="fD">
+<div class="two"><div><label for="fR">Responsable</label><input id="fR"></div>
+<div><label for="fE">Échéance</label><input id="fE" type="date"></div></div>
+<div class="two"><div><label for="fP">Priorité</label><select id="fP"><option>Haute</option><option selected>Moyenne</option><option>Basse</option></select></div>
+<div><label for="fS">Statut</label><select id="fS"><option value="planifiee">Planifiée</option><option value="en_cours">En cours</option><option value="cloturee">Clôturée</option></select></div></div>
+<label for="fW">Mot de passe</label><input id="fW" type="password" autocomplete="off">
+<div class="err" id="eAdd"></div>
+<div class="foot"><button id="cAdd">Annuler</button><button class="ok" id="oAdd">Enregistrer l’action</button></div></dialog>
+
+<dialog id="dPw"><h3 id="pwTitle">Confirmer</h3>
+<label for="pW">Mot de passe</label><input id="pW" type="password" autocomplete="off">
+<div class="err" id="ePw"></div>
+<div class="foot"><button id="cPw">Annuler</button><button class="ok" id="oPw">Valider</button></div></dialog>
+
+<dialog id="dChg"><h3>Changer le mot de passe</h3>
+<label for="c1">Mot de passe actuel</label><input id="c1" type="password" autocomplete="off">
+<label for="c2">Nouveau mot de passe</label><input id="c2" type="password" autocomplete="off">
+<label for="c3">Confirmer le nouveau mot de passe</label><input id="c3" type="password" autocomplete="off">
+<div class="err" id="eChg"></div>
+<div class="foot"><button id="cChg">Annuler</button><button class="ok" id="oChg">Enregistrer</button></div></dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='plan_actions_v1',PK='plan_actions_pw';
+const ST={en_cours:['En cours','var(--en)'],planifiee:['Planifiée','var(--pl)'],cloturee:['Clôturée','var(--cl)']};
+const PRI={Haute:'#b3392f',Moyenne:'#c27d0e',Basse:'#8a949e'};
+const today=new Date().toISOString().slice(0,10);
+const hash=s=>{let x=5381;for(const c of s)x=((x*33)^c.charCodeAt(0))>>>0;return String(x)};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let pw=hash('wael');
+try{pw=localStorage.getItem(PK)||pw}catch(e){}
+const sample=[
+{id:1,t:'Remplacer le joint de la presse P3',d:'Fuite hydraulique constatée',r:'Nabil',e:'2026-11-10',p:'Haute',st:'en_cours'},
+{id:2,t:'Étalonner les capteurs de la ligne 2',d:'',r:'Sami',e:'2026-11-28',p:'Moyenne',st:'planifiee'},
+{id:3,t:'Mettre à jour la matrice de compétences',d:'Techniciens de maintenance',r:'Wael',e:'2026-11-05',p:'Basse',st:'cloturee'},
+{id:4,t:'Graissage préventif des convoyeurs',d:'',r:'Nabil',e:'2026-12-03',p:'Moyenne',st:'planifiee'},
+{id:5,t:'Réviser le réglage de la soudure ultrasons',d:'Étanchéité à contrôler',r:'Sami',e:'2026-11-20',p:'Haute',st:'en_cours'},
+{id:6,t:'Former deux opérateurs à la maintenance de niveau 1',d:'',r:'Wael',e:'2026-12-15',p:'Basse',st:'planifiee'}];
+let data=sample,tab='all',q='';
+try{const s=localStorage.getItem(KEY);if(s)data=JSON.parse(s)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+$('today').textContent='Situation au '+new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+const TABS=[['all','Toutes'],['en_cours','En cours'],['planifiee','À planifier'],['cloturee','Clôturées'],['arch','Archivées']];
+function render(){
+ const act=data.filter(a=>!a.arch);
+ const n=k=>act.filter(a=>a.st===k).length;
+ const late=act.filter(a=>a.st!=='cloturee'&&a.e&&a.e<today).length;
+ const tot=act.length,cl=n('cloturee');
+ $('kpis').innerHTML=[['Actions suivies',tot,'var(--acc)'],['En cours',n('en_cours'),'var(--en)'],['Planifiées',n('planifiee'),'var(--pl)'],['Clôturées',cl+' ('+(tot?Math.round(cl/tot*100):0)+' %)','var(--cl)']]
+  .map(k=>`<div class="kpi" style="--k:${k[2]}"><b>${k[1]}</b><span>${k[0]}</span></div>`).join('')
+  +'';
+ // donut
+ const R=52,C=2*Math.PI*R;let off=0,seg='';
+ Object.keys(ST).forEach(k=>{const l=tot?n(k)/tot*C:0;seg+=`<circle r="${R}" cx="70" cy="70" fill="none" stroke="${ST[k][1]}" stroke-width="22" stroke-dasharray="${l} ${C-l}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;off+=l});
+ $('donut').innerHTML=`<svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Répartition par statut"><circle r="${R}" cx="70" cy="70" fill="none" stroke="#eef1f4" stroke-width="22"/>${seg}<text x="70" y="68" text-anchor="middle" font-size="26" font-weight="700" fill="#14202b">${tot}</text><text x="70" y="86" text-anchor="middle" font-size="11" fill="#5b6975">actions</text></svg>
+ <ul class="legend">${Object.keys(ST).map(k=>`<li style="--k:${ST[k][1]}"><span class="dot"></span>${ST[k][0]} : <b>${n(k)}</b></li>`).join('')}<li style="--k:var(--red)"><span class="dot"></span>En retard : <b>${late}</b></li></ul>`;
+ // bars
+ const rs={};act.forEach(a=>{(rs[a.r||'—']=rs[a.r||'—']||[]).push(a)});
+ const mx=Math.max(1,...Object.values(rs).map(v=>v.length));
+ $('bars').innerHTML=Object.keys(rs).sort().map(r=>{const v=rs[r];
+  return `<div class="brow"><span>${esc(r)}</span><div class="bar" style="width:${v.length/mx*100}%">${Object.keys(ST).map(k=>{const c=v.filter(a=>a.st===k).length;return c?`<i style="background:${ST[k][1]};width:${c/v.length*100}%" title="${ST[k][0]} : ${c}"></i>`:''}).join('')}</div><b>${v.length}</b></div>`}).join('')||'<span style="color:var(--mute)">Aucune donnée</span>';
+ // tabs
+ $('tabs').innerHTML=TABS.map(t=>`<button data-tab="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]} (${t[0]==='all'?act.length:t[0]==='arch'?data.filter(a=>a.arch).length:n(t[0])})</button>`).join('');
+ // rows
+ let L=data.filter(a=>tab==='arch'?a.arch:!a.arch&&(tab==='all'||a.st===tab));
+ if(q)L=L.filter(a=>(a.t+' '+a.r+' '+a.d).toLowerCase().includes(q));
+ L.sort((a,b)=>(a.e||'9').localeCompare(b.e||'9'));
+ $('empty').hidden=L.length>0;
+ $('rows').innerHTML=L.map(a=>{const lt=a.st!=='cloturee'&&a.e&&a.e<today&&!a.arch;
+  return `<tr><td class="t">${esc(a.t)}${a.d?`<small>${esc(a.d)}</small>`:''}</td><td>${esc(a.r)}</td>
+  <td class="${lt?'late':''}">${a.e?new Date(a.e).toLocaleDateString('fr-FR'):'—'}${lt?' (retard)':''}</td>
+  <td><span class="pri"><span class="dot" style="--k:${PRI[a.p]}"></span>${a.p}</span></td>
+  <td>${a.arch?'<span class="st" style="--k:var(--ar)">Archivée</span>':`<select class="st" style="--k:${ST[a.st][1]}" data-id="${a.id}" data-act="st" aria-label="Statut">${Object.keys(ST).map(k=>`<option value="${k}" ${k===a.st?'selected':''}>${ST[k][0]}</option>`).join('')}</select>`}</td>
+  <td><div class="row-actions"><button data-id="${a.id}" data-act="arch">${a.arch?'Restaurer':'Archiver'}</button><button class="del" data-id="${a.id}" data-act="del">Supprimer</button></div></td></tr>`}).join('');
+}
+
+// mot de passe
+let pending=null;
+function ask(title,fn){pending=fn;$('pwTitle').textContent=title;$('pW').value='';$('ePw').textContent='';$('dPw').showModal();$('pW').focus()}
+function okPw(){if(hash($('pW').value)!==pw){$('ePw').textContent='Mot de passe incorrect.';return}const f=pending;pending=null;$('dPw').close();f()}
+$('oPw').onclick=okPw;$('pW').onkeydown=e=>{if(e.key==='Enter')okPw()};
+$('cPw').onclick=()=>{pending=null;$('dPw').close();render()};
+$('dPw').addEventListener('cancel',()=>{pending=null;render()});
+
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.tab;render()}};
+$('q').oninput=e=>{q=e.target.value.toLowerCase().trim();render()};
+$('rows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=+b.dataset.id,a=data.find(x=>x.id===id);
+ if(b.dataset.act==='del')ask('Supprimer cette action ?',()=>{data=data.filter(x=>x.id!==id);save();render()});
+ if(b.dataset.act==='arch')ask(a.arch?'Restaurer cette action ?':'Archiver cette action ?',()=>{a.arch=!a.arch;save();render()})};
+$('rows').onchange=e=>{const s=e.target;if(s.dataset.act!=='st')return;const a=data.find(x=>x.id===+s.dataset.id),v=s.value;
+ ask('Modifier le statut',()=>{a.st=v;save();render()})};
+
+// ajout
+$('bAdd').onclick=()=>{['fT','fD','fR','fE','fW'].forEach(i=>$(i).value='');$('eAdd').textContent='';$('dAdd').showModal();$('fT').focus()};
+$('cAdd').onclick=()=>$('dAdd').close();
+$('oAdd').onclick=()=>{
+ if(!$('fT').value.trim()){$('eAdd').textContent='Saisissez l’intitulé de l’action.';return}
+ if(hash($('fW').value)!==pw){$('eAdd').textContent='Mot de passe incorrect.';return}
+ data.push({id:Date.now(),t:$('fT').value.trim(),d:$('fD').value.trim(),r:$('fR').value.trim(),e:$('fE').value,p:$('fP').value,st:$('fS').value});
+ save();$('dAdd').close();render()};
+
+// changer le mot de passe
+$('bPw').onclick=()=>{['c1','c2','c3'].forEach(i=>$(i).value='');$('eChg').textContent='';$('dChg').showModal();$('c1').focus()};
+$('cChg').onclick=()=>$('dChg').close();
+$('oChg').onclick=()=>{
+ if(hash($('c1').value)!==pw){$('eChg').textContent='Le mot de passe actuel est incorrect.';return}
+ if($('c2').value.length<4){$('eChg').textContent='Le nouveau mot de passe doit contenir au moins 4 caractères.';return}
+ if($('c2').value!==$('c3').value){$('eChg').textContent='La confirmation ne correspond pas.';return}
+ pw=hash($('c2').value);try{localStorage.setItem(PK,pw)}catch(e){}
+ $('dChg').close()};
+render();
+</script>
+</body>
+</html>
